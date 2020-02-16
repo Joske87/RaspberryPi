@@ -1,9 +1,12 @@
 import os
 import pysftp
 import random
+from PhotoBaseFolder import PhotoBaseFolder
 
 # Folder to load
 Folder = r"D:\Photos_Freya"
+Folder = "Y:\\"
+photobasefolder = PhotoBaseFolder(Folder)
 
 # Server settings
 host='sftp.steurs.ch'
@@ -28,17 +31,9 @@ with pysftp.Connection(host, username = username, private_key = pkey,private_key
         hostkeys.add(host, sftp.remote_server_key.get_name(), sftp.remote_server_key)
         hostkeys.save(pysftp.helpers.known_hosts())
 
-    photolist = []
-    dirs = os.listdir(Folder)
-    photoFolder = os.path.join(Folder, random.choice(dirs))
-    for root, dirs, files in os.walk(photoFolder):
-        for file in files:
-            if file.endswith(('.jpg', '.JPG')):
-                photolist.append(os.path.join(root, file))
-
     with sftp.cd('PhotoFrame'):
         for oldfile in sftp.listdir():
             sftp.remove(oldfile)
-        for photo in photolist:
+        for photo in photobasefolder.photolist:
             sftp.put(photo)
     sftp.close()
